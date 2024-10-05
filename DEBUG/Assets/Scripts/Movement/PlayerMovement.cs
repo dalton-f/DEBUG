@@ -26,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
     public float dashDuration;
     public float dashCooldown;
     public float dashSpeedChangeFactor;
-
+    public ParticleSystem dashEffect;
     private float dashCooldownTimer;
 
     [Header("Keybinds")]
@@ -40,17 +40,23 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("References")]
     public Transform orientation;
+    public Transform cameraPosition;
+    public PlayerCam playerCamera;
+
+    private ParticleSystem speedVFX;
+
     private float horizontalInput;
     private float verticalInput;
     private Vector3 moveDirection;
     private Rigidbody rb;
-
     private float speedChangeFactor;
     private float desiredMoveSpeed;
     private float lastDesiredMoveSpeed;
 
     private MovementState lastState;
     private bool keepMomentum;
+
+    private Coroutine moveSpeedCoroutine;
 
     [Header("States")]
 
@@ -144,11 +150,13 @@ public class PlayerMovement : MonoBehaviour
             // If we want to maintain our momentum, use a coroutine to lerp smoothly between the desiredMoveSpeed and the current mvoeSpeed
             if(keepMomentum) {
                 StopAllCoroutines();
+  
                 StartCoroutine(SmoothlyLerpMoveSpeed());
             } 
             // The speed will instantly change to the desired move speed if the momentum doesn't need to be kept
             else {
                 StopAllCoroutines();
+  
                 moveSpeed = desiredMoveSpeed;
             }
         }
@@ -203,7 +211,7 @@ public class PlayerMovement : MonoBehaviour
         if(dashCooldownTimer > 0) return;
         // Otherwise, perform the dash and reset the cooldown
         else dashCooldownTimer = dashCooldown;
-
+        
         isDashing = true;
 
         // Disable gravity and reset velocity
@@ -213,6 +221,15 @@ public class PlayerMovement : MonoBehaviour
         // Add the dash force to the rigid body
         rb.AddForce(orientation.forward * dashForce, ForceMode.Impulse);
 
+        // Zoom out camera
+        playerCamera.ChangeFOV(75);
+        // Instantiate particle effect
+        speedVFX = Instantiate(dashEffect, cameraPosition.transform.position, cameraPosition.transform.rotation);
+        // Set it as a child of the camera
+        speedVFX.transform.SetParent(cameraPosition.transform);
+        // Apply offset so it is visible
+        speedVFX.transform.localPosition = new Vector3(0, 0, 8f);
+
         Invoke(nameof(ResetDash), dashDuration);
     }
 
@@ -220,6 +237,8 @@ public class PlayerMovement : MonoBehaviour
         isDashing = false;
         rb.useGravity = true;
 
+        playerCamera.ChangeFOV(60);
+        Destroy(speedVFX);
     }
 
     private IEnumerator SmoothlyLerpMoveSpeed() {

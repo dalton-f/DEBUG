@@ -37,4 +37,27 @@ public class PlayerCam : MonoBehaviour
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
         orientation.rotation = Quaternion.Euler(0f, yRotation, 0);
     }
+
+    public void ChangeFOV(float targetFOV)
+    {
+        StartCoroutine(SmoothFOVChange(targetFOV));
+    }
+
+    private IEnumerator SmoothFOVChange(float targetFOV)
+    {
+        Camera camera = GetComponent<Camera>();
+
+        float currentFOV = camera.fieldOfView;
+        float duration = 0.5f; 
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            camera.fieldOfView = Mathf.Lerp(currentFOV, targetFOV, elapsed / duration);
+            elapsed += Time.deltaTime * 3f;
+            yield return null;
+        }
+
+        camera.fieldOfView = targetFOV;
+    }
 }
