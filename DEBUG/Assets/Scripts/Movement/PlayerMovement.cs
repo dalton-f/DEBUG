@@ -3,30 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
-
 public class PlayerMovement : MonoBehaviour
 {
 
     [Header("Movement Settings")]
+    [SerializeField] private float walkSpeed;
+    [SerializeField] private float maxYSpeed;
+    [SerializeField] private float dashSpeed;
+    [SerializeField] private float groundDrag = 5f;
+    
     private float moveSpeed;
-    public float walkSpeed;
-    public float maxYSpeed;
-    public float dashSpeed;
-    public float groundDrag = 5f;
 
     [Header("Jumping Settings")]
-
-    public float jumpForce = 10f;
-    public float jumpCooldown = 0.25f;
-    public float airMultiplier = 0.5f;
+    [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float jumpCooldown = 0.25f;
+    [SerializeField] private float airMultiplier = 0.5f;
     bool readyToJump = true;
 
     [Header("Dashing Settings")]
-    public float dashForce;
-    public float dashDuration;
-    public float dashCooldown;
-    public float dashSpeedChangeFactor;
-    public ParticleSystem dashEffect;
+    [SerializeField] private float dashForce;
+    [SerializeField] private float dashDuration;
+    [SerializeField] private float dashCooldown;
+    [SerializeField] private float dashSpeedChangeFactor;
+    [SerializeField] private ParticleSystem dashEffect;
     private float dashCooldownTimer;
 
     [Header("Keybinds")]
@@ -43,23 +42,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform cameraPosition;
     public PlayerCam playerCamera;
 
-    private ParticleSystem speedVFX;
-
-    private float horizontalInput;
-    private float verticalInput;
-    private Vector3 moveDirection;
-    private Rigidbody rb;
-    private float speedChangeFactor;
-    private float desiredMoveSpeed;
-    private float lastDesiredMoveSpeed;
-
-    private MovementState lastState;
-    private bool keepMomentum;
-
-    private Coroutine moveSpeedCoroutine;
-
     [Header("States")]
-
     public bool isDashing;
     public MovementState state;
 
@@ -69,6 +52,17 @@ public class PlayerMovement : MonoBehaviour
         dashing,
         air
     }
+
+    private ParticleSystem speedVFX;
+    private float horizontalInput;
+    private float verticalInput;
+    private Vector3 moveDirection;
+    private Rigidbody rb;
+    private float speedChangeFactor;
+    private float desiredMoveSpeed;
+    private float lastDesiredMoveSpeed;
+    private MovementState lastState;
+    private bool keepMomentum;
 
     void Start()
     {
@@ -237,6 +231,7 @@ public class PlayerMovement : MonoBehaviour
         isDashing = false;
         rb.useGravity = true;
 
+        // Reset visual effects
         playerCamera.ChangeFOV(60);
         Destroy(speedVFX);
     }
