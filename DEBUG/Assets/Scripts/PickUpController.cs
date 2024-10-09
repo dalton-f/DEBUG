@@ -50,6 +50,7 @@ public class PickUpController : MonoBehaviour
             heldObj = pickUpObj;
             heldObjRb = pickUpObj.GetComponent<Rigidbody>();
             heldObjRb.isKinematic = true;
+            // Set the held object as a child of the camera
             heldObjRb.transform.parent = holdPos.transform;
         }
     }
@@ -57,6 +58,7 @@ public class PickUpController : MonoBehaviour
     void DropObject()
     {
         heldObjRb.isKinematic = false;
+        // Remove the parent
         heldObj.transform.parent = null;
         heldObj = null;
     }
@@ -68,14 +70,29 @@ public class PickUpController : MonoBehaviour
     
     void StopClipping()
     {
-        var clipRange = Vector3.Distance(heldObj.transform.position, transform.position);
-
-        RaycastHit[] hits;
-        hits = Physics.RaycastAll(transform.position, transform.TransformDirection(Vector3.forward), clipRange);
-     
-        if (hits.Length > 1)
-        {
-            heldObj.transform.position = new Vector3(heldObj.transform.position.x, heldObj.transform.position.y + 1f, heldObj.transform.position.z);
+        // While the cube is still clipping, move it upwards into the nearest free spaec
+        while(IsClipping()) {
+            heldObj.transform.position += new Vector3(0, 1f, 0);
         }
+    }
+
+    bool IsClipping()
+    {
+        // Get the collider of the held object
+        Collider objCollider = heldObj.GetComponent<Collider>();
+
+        // Check for overlaps in a sphere cast upwards while using half of the object's size
+        RaycastHit[] hits = Physics.SphereCastAll(heldObj.transform.position, objCollider.bounds.extents.magnitude, Vector3.up, 0.1f);
+
+        // Exclude self-collision
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider != objCollider) 
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
