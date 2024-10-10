@@ -30,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
-    public KeyCode dashKey = KeyCode.E;
+    public KeyCode dashKey = KeyCode.LeftShift;
 
     [Header("Ground Checks")]
     public float playerHeight = 2f;
